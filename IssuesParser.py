@@ -25,6 +25,7 @@ def parse_header(header, get_last_link=False):
 
     links = links_line.replace("Link: ", "").split(",")
 
+    # todo: fix this as there are 3 links for a page with a previous page
     if get_last_link:
         first_link, last_link = [link.split(";")[0] for link in links]
         return first_link.lstrip("<").rstrip(">"), \
