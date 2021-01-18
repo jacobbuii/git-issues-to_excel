@@ -99,9 +99,12 @@ def read_all_pages(repo_url, username, auth_token=None):
 
     json_list = [first_json]
     while next_page != last_page:
+        # todo: add a check to see if the rate limit has been exceeded
         next_header, next_json = get_issues_json(
             next_page, username, auth_token)
         json_list.append(next_json)
         next_page = parse_header(next_header)
 
     return json_list
+
+# todo: add a function to convert list of jsons to excel
