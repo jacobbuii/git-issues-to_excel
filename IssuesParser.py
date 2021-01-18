@@ -22,7 +22,7 @@ def parse_header(header):
     links = links_line.replace("Link: ", "").split(",")
     first_link, last_link = [link.split(";")[0] for link in links]
 
-    first_link_formatted = first_link.rstrip(">")
+    first_link_formatted = first_link.lstrip("<").rstrip(">")
     last_link_formatted = last_link.lstrip(" <").rstrip(">")
 
     return first_link_formatted, last_link_formatted
