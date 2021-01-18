@@ -4,28 +4,34 @@ import subprocess
 import pandas as pd
 
 
-def parse_header(header):
+def parse_header(header, get_last_link=False):
     """
     Parses the header to get the link to the next page of issues, checks this
     isn't the last page.
 
     Args:
         header (str): header as string.
+        get_last_link (bool): flag to determine whether to get the last link or
+            not.
 
     Returns:
-        str: link to the next page to parse
+        tuple/str: link to the next page and last page to parse or just the
+            next page.
+
     """
 
     header_list = header.split("\n")
     links_line = [line for line in header_list if "Link: " in line][0]
 
     links = links_line.replace("Link: ", "").split(",")
-    first_link, last_link = [link.split(";")[0] for link in links]
 
-    first_link_formatted = first_link.lstrip("<").rstrip(">")
-    last_link_formatted = last_link.lstrip(" <").rstrip(">")
-
-    return first_link_formatted, last_link_formatted
+    if get_last_link:
+        first_link, last_link = [link.split(";")[0] for link in links]
+        return first_link.lstrip("<").rstrip(">"), \
+            last_link.lstrip(" <").rstrip(">")
+    else:
+        first_link = [link.split(";")[0] for link in links][0]
+        return first_link.lstrip("<").rstrip(">")
 
 
 def split_header(curl_output):
@@ -78,12 +84,12 @@ def read_all_pages(repo_url):
     """
 
     first_header, first_json = get_issues_json(repo_url)
-    next_page, last_page = parse_header(first_header)
+    next_page, last_page = parse_header(first_header, get_last_link=True)
 
     json_list = [first_json]
     while next_page != last_page:
         next_header, next_json = get_issues_json(next_page)
         json_list.append(next_json)
-        next_page = parse_header(next_header)[0]
+        next_page = parse_header(next_header)
 
     return json_list
