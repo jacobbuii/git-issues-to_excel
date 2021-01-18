@@ -51,18 +51,27 @@ def split_header(curl_output):
     return curl_output[:json_start_idx], curl_output[json_start_idx:]
 
 
-def get_issues_json(curl_url):
+def get_issues_json(curl_url, username, auth_token=None):
     """
     Calls curl via subprocess and writes the curl output to a json file.
 
     Args:
         curl_url (str): Link to the url to use as curl argument.
+        username (str): github username.
+        auth_token (str): github authentication token.
 
     Returns:
         pathlib.Path: filepath to json file containing output from curl call.
     """
 
-    p = subprocess.Popen(["curl", "-i", curl_url], stdout=subprocess.PIPE,
+    curl_command = ["curl", "-i", curl_url]
+
+    # add authentication info if provided
+    if auth_token is not None:
+        curl_command.pop()
+        curl_command += ["-u", "{}:{}".format(username, auth_token), curl_url]
+
+    p = subprocess.Popen(curl_command, stdout=subprocess.PIPE,
                          stderr=subprocess.PIPE)
 
     stdout, stderr = p.communicate()
@@ -70,25 +79,28 @@ def get_issues_json(curl_url):
     return split_header(stdout.decode("utf-8"))
 
 
-def read_all_pages(repo_url):
+def read_all_pages(repo_url, username, auth_token=None):
     """
     Loops through all pages of a git repo's issues page.
 
     Args:
         repo_url (str): url of a git repo's issue page in the format:
             https://api.github.com/repos/org/repo/issues
+        username (str): github username.
+        auth_token (str): github authentication token.
 
     Returns:
         list: list of the json outputs as str for each page of issues.
 
     """
 
-    first_header, first_json = get_issues_json(repo_url)
+    first_header, first_json = get_issues_json(repo_url, username, auth_token)
     next_page, last_page = parse_header(first_header, get_last_link=True)
 
     json_list = [first_json]
     while next_page != last_page:
-        next_header, next_json = get_issues_json(next_page)
+        next_header, next_json = get_issues_json(
+            next_page, username, auth_token)
         json_list.append(next_json)
         next_page = parse_header(next_header)
 
