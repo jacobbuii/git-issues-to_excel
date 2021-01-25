@@ -1,10 +1,12 @@
 import pathlib
+import re
 import subprocess
+import sys
 
 import pandas as pd
 
 
-def parse_header(header, get_last_link=False):
+def parse_header(header):
     """
     Parses the header to get the link to the next page of issues, checks this
     isn't the last page.
@@ -20,19 +22,24 @@ def parse_header(header, get_last_link=False):
 
     """
 
+    formatting = re.compile("[\ \<\>]")
+
     header_list = header.split("\n")
     links_line = [line for line in header_list if "Link: " in line][0]
 
     links = links_line.replace("Link: ", "").split(",")
 
-    # todo: fix this as there are 3 links for a page with a previous page
-    if get_last_link:
-        first_link, last_link = [link.split(";")[0] for link in links]
-        return first_link.lstrip("<").rstrip(">"), \
-            last_link.lstrip(" <").rstrip(">")
+    prev_link, next_link, last_link = [None, None, None]
+
+    if len(links) == 3:
+        prev_link, next_link, last_link = [link.split(";")[0] for link in links]
+    elif len(links) == 2:
+        next_link, last_link = [link.split(";")[0] for link in links]
     else:
-        first_link = [link.split(";")[0] for link in links][0]
-        return first_link.lstrip("<").rstrip(">")
+        print("Error! unexpected number of links")
+        sys.exit(1)
+
+    return prev_link, next_link, last_link
 
 
 def split_header(curl_output):
@@ -96,7 +103,7 @@ def read_all_pages(repo_url, username, auth_token=None):
     """
 
     first_header, first_json = get_issues_json(repo_url, username, auth_token)
-    next_page, last_page = parse_header(first_header, get_last_link=True)
+    next_page, last_page = parse_header(first_header)
 
     json_list = [first_json]
     while next_page != last_page:
