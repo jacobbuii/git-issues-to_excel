@@ -9,6 +9,9 @@ Command line usage:
 See https://docs.github.com/en/rest/reference/issues for more on the github issues 
 API syntax and url usage.
 
+See https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token
+for information on generating a personal git authentication token.
+
 Examples:
 
 Get all open issues with the label `00 - Bug` from numpy:
