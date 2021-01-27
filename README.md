@@ -12,7 +12,9 @@ API syntax and url usage.
 Examples:
 
 Get all open issues with the label `00 - Bug` from numpy:
+
 `python -m gi2xl "https://api.github.com/repos/numpy/numpy/issues?labels=00+-+Bug" <git_username> <git_authentication_token>`
 
 Get all closed issues with the label `00 - Bug` from numpy:
+
 `python -m gi2xl "https://api.github.com/repos/numpy/numpy/issues?labels=00+-+Bug&state=closed" <git_username> <git_authentication_token>`
