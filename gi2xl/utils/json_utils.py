@@ -19,6 +19,7 @@ def parse_header(header):
     formatting = re.compile("[\ \<\>]")
 
     header_list = header.split("\n")
+    # TODO: the "Link in" needs to be case insensitive...
     links_line = [line for line in header_list if "Link: " in line][0]
 
     # remove formatting and link separator from line
